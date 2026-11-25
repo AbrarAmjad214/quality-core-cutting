@@ -1,0 +1,64 @@
+# =============================================================================
+#  Project root (public_html) — Laravel lives here, its public/ folder inside.
+#  Domain: qualitycorecuttinguae.com
+#  Goal: every URL is https://qualitycorecuttinguae.com/.../ in ONE 301 hop,
+#  "public" never appears in the URL, and app files are never reachable.
+# =============================================================================
+
+Options -Indexes
+
+# Belt-and-braces: deny dotfiles even if mod_rewrite is unavailable
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # --- 1. Let SSL / ACME validation through untouched ---------------------
+    RewriteRule ^\.well-known/ - [L]
+
+    # --- 2. 403 for anything that is not part of the public website --------
+    # dotfiles / dot-folders (.env, .git, .htaccess ...)
+    RewriteRule (^|/)\. - [F,L]
+    # framework folders
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|tests|vendor|node_modules)(/|$) - [F,L]
+    # project files
+    RewriteRule ^(artisan|composer\.json|composer\.lock|package\.json|package-lock\.json|phpunit\.xml)$ - [F,L]
+
+    # --- 3. http:// or www → https://qualitycorecuttinguae.com (one hop) ---
+    # Also strips a leading /public and adds the trailing slash in the same hop,
+    # so e.g. http://www.qualitycorecuttinguae.com/about → https://qualitycorecuttinguae.com/about/
+    # (a) home / bare /public
+    RewriteCond %{HTTP_HOST} ^(www\.)?qualitycorecuttinguae\.com$ [NC]
+    RewriteCond %{HTTPS} !=on [OR]
+    RewriteCond %{HTTP_HOST} ^www\. [NC]
+    RewriteRule ^(public/?)?$ https://qualitycorecuttinguae.com/ [R=301,L]
+    # (b) file-like paths keep no slash (/sitemap.xml, /assets/app.css)
+    RewriteCond %{HTTP_HOST} ^(www\.)?qualitycorecuttinguae\.com$ [NC]
+    RewriteCond %{HTTPS} !=on [OR]
+    RewriteCond %{HTTP_HOST} ^www\. [NC]
+    RewriteRule ^(?:public/)?(.*\.[a-zA-Z0-9]{2,5})$ https://qualitycorecuttinguae.com/$1 [R=301,L,NE]
+    # (c) everything else gets the trailing slash
+    RewriteCond %{HTTP_HOST} ^(www\.)?qualitycorecuttinguae\.com$ [NC]
+    RewriteCond %{HTTPS} !=on [OR]
+    RewriteCond %{HTTP_HOST} ^www\. [NC]
+    RewriteRule ^(?:public/)?(.+?)/?$ https://qualitycorecuttinguae.com/$1/ [R=301,L,NE]
+
+    # --- 4. /public/anything → /anything (301) ------------------------------
+    # Only for the original request (REDIRECT_STATUS empty), never for our own
+    # internal rewrite below. Same file-like / trailing-slash split as above.
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteCond %{REQUEST_URI} ^/public/?$
+    RewriteRule ^ / [R=301,L]
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteCond %{REQUEST_URI} ^/public/(.*\.[a-zA-Z0-9]{2,5})$
+    RewriteRule ^ /%1 [R=301,L,NE]
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteCond %{REQUEST_URI} ^/public/(.+?)/?$
+    RewriteRule ^ /%1/ [R=301,L,NE]
+
+    # --- 5. Serve everything from public/ internally -----------------------
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
