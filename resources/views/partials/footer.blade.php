@@ -49,6 +49,7 @@
     <div class="container site-footer__bottom">
         <p>&copy; {{ date('Y') }} {{ config('site.name') }}. All rights reserved.</p>
         <p>Serving {{ implode(' · ', array_slice(config('site.area_served'), 0, 3)) }} &amp; all Emirates</p>
+        <p class="site-credit">Designed &amp; developed by <a href="https://rabrar.com/" target="_blank" rel="noopener">rabrar.com</a></p>
     </div>
 </footer>
 

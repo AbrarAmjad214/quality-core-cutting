@@ -608,3 +608,7 @@ a.contact-card:hover { border-color: rgba(255, 106, 31, .4); box-shadow: 0 20px 
 .city-links { margin-top: 1.25rem; font-size: .95rem; color: var(--muted); }
 .city-links a { color: #c24f10; font-weight: 600; }
 .site-footer__title--gap { margin-top: 1.75rem; }
+
+/* footer credit */
+.site-credit a { color: var(--d-text); font-weight: 600; text-decoration: none; }
+.site-credit a:hover { color: var(--amber); }
