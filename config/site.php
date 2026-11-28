@@ -41,6 +41,11 @@ return [
     // Where website form enquiries are emailed.
     'enquiry_email' => env('ENQUIRY_EMAIL', 'info@qualitycorecuttinguae.com'),
 
+    // CallMeBot API key for WhatsApp notifications on new enquiries.
+    // Get your free key: https://www.callmebot.com/blog/free-api-whatsapp-messages/
+    // Then add  CALLMEBOT_API_KEY=your_key  to your .env file.
+    'callmebot_api_key' => env('CALLMEBOT_API_KEY'),
+
     // Google Search Console / Bing Webmaster verification codes (content value only).
     'google_verification' => env('GOOGLE_SITE_VERIFICATION'),
     'bing_verification'   => env('BING_SITE_VERIFICATION'),
